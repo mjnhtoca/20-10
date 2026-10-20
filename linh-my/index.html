@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="vi" style="--accent: #ff6fae; --accent-strong: #d15b8f; --bg-inner: #59122e; --bg-mid: #31081a; --bg-outer: #14020a;"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gửi Linh My 💌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&amp;family=Dancing+Script:wght@600;700&amp;family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Playfair+Display:ital,wght@0,700;0,800;1,600&amp;display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+      --script: 'Dancing Script', cursive;
+      --pink: #ff6fae;
+      --deep-pink: #ff3d84;
+      --gold: #ffe3b3;
+      --accent: #ff6fae;
+      --accent-strong: #ff3d84;
+      --bg-inner: #59122e;
+      --bg-mid: #31081a;
+      --bg-outer: #14020a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 42%, var(--bg-inner) 0%, var(--bg-mid) 48%, var(--bg-outer) 100%);
+      font-family: var(--sans);
+      color: #fff;
+      position: relative;
+    }
+
+    /* Ambient glowing aura in center */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(255, 77, 148, 0.22), transparent 55%),
+        radial-gradient(circle at 20% 80%, rgba(255, 140, 180, 0.08), transparent 45%),
+        radial-gradient(circle at 80% 20%, rgba(255, 100, 150, 0.08), transparent 45%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Fullscreen canvas for stars & physics hearts */
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #heartCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Custom cursor & heart trail */
+    .cursor-glow {
+      position: fixed;
+      top: -12px;
+      left: -12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 140, 190, 0.9) 0%, rgba(255, 61, 132, 0) 70%);
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.2s;
+      mix-blend-mode: screen;
+    }
+
+    .trail {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      font-size: 1rem;
+      transform: translate(-50%, -50%);
+      animation: trailFloat 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.8));
+    }
+
+    @keyframes trailFloat {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.7) rotate(0deg);
+      }
+      50% {
+        opacity: 0.9;
+        transform: translate(-50%, -95%) scale(1.15) rotate(12deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -140%) scale(0.6) rotate(-12deg);
+      }
+    }
+
+    /* Floating Letters Layer */
+    #lettersLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+
+    .letter-node {
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: var(--serif);
+      font-weight: 800;
+      line-height: 1;
+      transform-origin: center center;
+      will-change: transform, opacity;
+      transition: text-shadow 0.5s ease, color 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .letter-node.line1 {
+      color: #fff3db;
+      text-shadow:
+        0 0 14px rgba(255, 215, 160, 0.75),
+        0 0 32px rgba(255, 111, 174, 0.55);
+    }
+
+    .letter-node.line2 {
+      color: color-mix(in srgb, var(--accent) 82%, white);
+      text-shadow:
+        0 0 18px rgba(255, 111, 174, 0.95),
+        0 0 38px rgba(255, 61, 132, 0.8),
+        0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .letter-node.deco {
+      color: rgba(255, 195, 220, 0.45);
+      text-shadow: 0 0 12px rgba(255, 111, 174, 0.45);
+    }
+
+    /* Ring around some letters like in the video */
+    .letter-node.ringed::after {
+      content: "";
+      position: absolute;
+      width: 1.75em;
+      height: 1.75em;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 220, 190, 0.65);
+      box-shadow:
+        0 0 15px rgba(255, 120, 175, 0.7),
+        inset 0 0 12px rgba(255, 120, 175, 0.4);
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .letter-node.assembled::after {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+
+    /* Center control / status stage */
+    #introStage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .status-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.05rem;
+      transform: translateY(10px);
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+    }
+
+    .status-wrap.lowered {
+      transform: translateY(125px);
+    }
+
+    #statusText {
+      font-family: var(--script);
+      font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+      color: #ffd6e7;
+      text-shadow: 0 0 16px rgba(255, 111, 174, 0.85);
+      letter-spacing: 0.02em;
+      text-align: center;
+      padding: 0 1rem;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    /* Exact button CSS from video at 00:00 */
+    #btn,
+    .b2 {
+      pointer-events: auto;
+      padding: 0.85rem 2rem;
+      border: 0;
+      border-radius: 99px;
+      font: 600 1.05rem var(--sans);
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 0 28px rgba(255, 61, 132, 0.55);
+      transition: transform 0.2s, opacity 0.35s, box-shadow 0.2s;
+      z-index: 5;
+    }
+
+    #btn:hover,
+    .b2:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 36px rgba(255, 61, 132, 0.85);
+    }
+
+    .b2.ghost {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: none;
+    }
+
+    /* Greeting Card Stage */
+    #cardStage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      z-index: 6;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(24px) scale(0.95);
+      transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #cardStage.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* Main Glassmorphism Card */
+    #card {
+      position: relative;
+      width: min(500px, 94vw);
+      max-height: 92vh;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding: 2.1rem 2rem 1.8rem;
+      border-radius: 28px;
+      background: linear-gradient(
+        160deg,
+        rgba(88, 22, 52, 0.72) 0%,
+        rgba(52, 11, 31, 0.78) 60%,
+        rgba(38, 7, 22, 0.84) 100%
+      );
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1.5px solid rgba(255, 165, 205, 0.35);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.55),
+        0 0 45px rgba(255, 77, 148, 0.25),
+        inset 0 0 28px rgba(255, 145, 190, 0.12);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #card::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Subtle diagonal light sheen inside card */
+    #card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 175, 210, 0.18), transparent 60%);
+      pointer-events: none;
+    }
+
+    .badge-2010 {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.38rem 1.1rem;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 210, 230, 0.35);
+      color: #ffe5f0;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+      box-shadow: 0 0 18px rgba(255, 111, 174, 0.2);
+    }
+
+    .top-heart {
+      font-size: 2.1rem;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+      filter: drop-shadow(0 0 14px rgba(255, 61, 132, 0.85));
+      animation: pulseHeart 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulseHeart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.13); }
+    }
+
+    .send-to {
+      font-family: var(--script);
+      font-size: 1.35rem;
+      color: #ffbfd9;
+      margin-bottom: 0.1rem;
+    }
+
+    .recipient-name {
+      font-family: var(--serif);
+      font-size: clamp(2.1rem, 5vw, 2.75rem);
+      font-weight: 700;
+      color: #ffd8e8;
+      text-shadow:
+        0 0 18px rgba(255, 111, 174, 0.85),
+        0 0 34px rgba(255, 61, 132, 0.45);
+      letter-spacing: 0.02em;
+      margin-bottom: 0.45rem;
+    }
+
+    .ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      font-size: 0.85rem;
+      color: rgba(255, 190, 215, 0.8);
+      margin-bottom: 1.05rem;
+    }
+
+    .typewriter-box {
+      min-height: 4.3rem;
+      font-size: 0.96rem;
+      line-height: 1.65;
+      color: rgba(255, 240, 246, 0.95);
+      max-width: 420px;
+      margin-bottom: 1.25rem;
+      padding: 0 0.25rem;
+    }
+
+    .cursor-caret {
+      display: inline-block;
+      width: 2px;
+      height: 1.05em;
+      background: #ff85b8;
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      animation: blinkCaret 0.75s step-end infinite;
+    }
+
+    @keyframes blinkCaret {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* 2x2 Wishes Grid */
+    .wishes-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .wish-item {
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 175, 210, 0.22);
+      border-radius: 16px;
+      padding: 0.85rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(14px) scale(0.96);
+      transition:
+        opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.25s ease,
+        border-color 0.25s ease;
+    }
+
+    .wish-item.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .wish-item:hover {
+      background: color-mix(in srgb, var(--accent) 14%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .wish-icon {
+      font-size: 1.3rem;
+      margin-bottom: 0.3rem;
+      filter: drop-shadow(0 0 8px rgba(255, 111, 174, 0.5));
+    }
+
+    .wish-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: color-mix(in srgb, var(--accent) 70%, white);
+      margin-bottom: 0.2rem;
+    }
+
+    .wish-desc {
+      font-size: 0.76rem;
+      line-height: 1.4;
+      color: rgba(255, 230, 240, 0.82);
+    }
+
+    /* Footer quote & signature inside card */
+    .card-extra {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .card-extra.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .closing-quote {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      color: #ffd9e8;
+      max-width: 390px;
+    }
+
+    .signature {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: color-mix(in srgb, var(--accent) 70%, white);
+      margin-top: 0.15rem;
+    }
+
+    .space-hint {
+      font-size: 0.74rem;
+      color: rgba(255, 215, 232, 0.6);
+      letter-spacing: 0.02em;
+    }
+
+    /* Particle burst element */
+    .burst-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9990;
+      font-size: 1.15rem;
+      will-change: transform, opacity;
+    }
+
+    @media (max-width: 480px) {
+      #card {
+        padding: 1.6rem 1.15rem 1.4rem;
+        border-radius: 22px;
+      }
+      .wishes-grid {
+        gap: 0.55rem;
+      }
+      .wish-item {
+        padding: 0.7rem 0.5rem;
+      }
+    }
+
+    /* -------- Giao diện tuỳ chỉnh: tách rời để không che thiệp -------- */
+    #settingsToggle {
+      position: fixed; top: max(18px, env(safe-area-inset-top)); right: 18px;
+      z-index: 10020; display: inline-flex; align-items: center; gap: 9px;
+      padding: 11px 17px; border: 1px solid rgba(255,255,255,.28);
+      border-radius: 999px; color: #fff; background: rgba(61,19,44,.78);
+      box-shadow: 0 8px 28px rgba(0,0,0,.35), 0 0 22px color-mix(in srgb, var(--accent) 22%, transparent);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      font: 700 13px var(--sans); letter-spacing: .01em; cursor: pointer;
+      transition: transform .2s, border-color .2s;
+    }
+    #settingsToggle:hover { transform: translateY(-2px); border-color: var(--accent); }
+    #settingsToggle svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; }
+    #settingsOverlay { position: fixed; inset: 0; z-index: 10028; background: rgba(8,2,11,.6); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity .25s; }
+    #settingsOverlay.open { opacity: 1; pointer-events: auto; }
+    #settingsPanel {
+      position: fixed; z-index: 10030; inset: 0 0 0 auto; width: min(440px, 100%);
+      display: flex; flex-direction: column; transform: translateX(102%);
+      transition: transform .35s cubic-bezier(.22,1,.36,1);
+      background: #210f24; color: #fff; border-left: 1px solid rgba(255,255,255,.16);
+      box-shadow: -18px 0 50px rgba(0,0,0,.55);
+      font: 14px var(--sans);
+    }
+    #settingsPanel.open { transform: translateX(0); }
+    #settingsPanel *, #settingsPanel *::before, #settingsPanel *::after { box-sizing: border-box; }
+    #settingsPanel input, #settingsPanel textarea, #settingsPanel select { user-select: text; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; gap: 12px; padding: 22px 22px 16px; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .panel-head h2 { font: 750 20px var(--sans); }
+    .panel-subtitle { margin-top: 5px; color: #e8c7da; line-height: 1.55; font-size: 12px; }
+    #settingsClose { display: grid; place-items: center; flex: none; width: 37px; height: 37px; border-radius: 11px; background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.16); cursor:pointer; font-size: 23px; }
+    .panel-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 8px 22px 25px; scrollbar-color: #825169 transparent; }
+    .panel-section { border-bottom: 1px solid rgba(255,255,255,.1); padding: 20px 0 18px; }
+    .panel-section h3 { font-size: 13px; letter-spacing: .02em; color: color-mix(in srgb, var(--accent) 60%, white); margin-bottom: 15px; }
+    .panel-field { display:flex; flex-direction: column; gap: 7px; margin-bottom: 13px; }
+    .panel-field:last-child { margin-bottom:0; }
+    .panel-field > label, .settings-label { font: 600 12px var(--sans); color: #f4dce9; }
+    .panel-field input:not([type=checkbox]):not([type=color]):not([type=range]),
+    .panel-field textarea, .panel-field select {
+      width: 100%; min-height: 39px; border: 1px solid rgba(255,255,255,.19); border-radius: 10px;
+      background: rgba(255,255,255,.065); padding: 9px 11px;
+      color: #fff; font: 13px var(--sans); outline: none;
+      transition: border-color .2s, background .2s;
+    }
+    .panel-field select option { background: #2b172d; color:#fff; }
+    .panel-field textarea { resize: vertical; min-height: 75px; line-height: 1.5; }
+    .panel-field input:focus, .panel-field textarea:focus, .panel-field select:focus { border-color: var(--accent); background: rgba(255,255,255,.095); }
+    .panel-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .panel-grid .panel-field { min-width:0; }
+    .wish-editor { padding:12px; border:1px solid rgba(255,255,255,.11); border-radius: 13px; background: rgba(255,255,255,.035); margin-bottom: 10px; }
+    .wish-editor-title { font-size:12px; font-weight:700; margin-bottom: 12px; color: #ffd9e9; }
+    .panel-switch { display:flex; justify-content:space-between; align-items:center; gap: 15px; margin: 0 0 15px; color:#f4dce9; cursor:pointer; font-weight:600; font-size: 12px; }
+    .panel-switch input { appearance:none; flex:none; cursor:pointer; width: 42px; height: 24px; border-radius:30px; background: rgba(255,255,255,.2); position:relative; transition:background .2s; }
+    .panel-switch input::before { content:""; position:absolute; width:18px; height:18px; top:3px; left:3px; border-radius:50%; background:#fff; transition:transform .2s; }
+    .panel-switch input:checked { background: var(--accent-strong); }
+    .panel-switch input:checked::before { transform:translateX(18px); }
+    .panel-color-row { display:flex; align-items:center; gap:12px; }
+    #setting-accent { appearance:none; width:48px; height:40px; border: 1px solid rgba(255,255,255,.25); border-radius:10px; padding:3px; background: rgba(255,255,255,.08); cursor:pointer; }
+    #setting-accent::-webkit-color-swatch { border-radius:6px; border:0; }
+    .range-row { display:flex; gap:10px; align-items:center; }
+    .range-row input { flex:1; accent-color:var(--accent); }
+    #fontScaleValue, #heartRateValue { min-width:45px; text-align:right; font-size:12px; color:#fff; font-variant-numeric:tabular-nums; }
+    .panel-foot { padding:14px 20px max(18px, env(safe-area-inset-bottom)); border-top:1px solid rgba(255,255,255,.12); background:#210f24; }
+    .panel-actions { display:grid; grid-template-columns: 1fr 1fr; gap:9px; }
+    .panel-action { min-height:40px; border-radius:11px; padding:9px 10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.09); color:#fff; font:700 12px var(--sans); cursor:pointer; }
+    .panel-action.primary { background:linear-gradient(135deg, var(--accent), var(--accent-strong)); border:0; }
+    .panel-action:hover { filter: brightness(1.15); }
+    #saveStatus { font-size:11px; margin-top:9px; text-align:center; color:#ddbdd1; min-height:15px; line-height:1.3; }
+    @media (max-width: 480px) {
+      #settingsToggle { right: 10px; top:max(10px, env(safe-area-inset-top)); padding: 10px 12px; font-size:12px; }
+      .panel-head { padding:19px 17px 14px; }
+      .panel-scroll { padding-left:17px; padding-right:17px; }
+      #settingsPanel { width:100%; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Background twinkling stars canvas -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Physics falling & piling hearts canvas -->
+  <canvas id="heartCanvas"></canvas>
+
+  <!-- Floating 3D-style letters layer -->
+  <div id="lettersLayer"></div>
+
+  <!-- Initial center prompt & button -->
+  <div id="introStage">
+    <div class="status-wrap" id="statusWrap">
+      <div id="statusText">✨ Có một thông điệp đang bay lạc... ✨</div>
+      <button id="btn">Giải mã 💌</button>
+    </div>
+  </div>
+
+  <!-- Greeting Card Modal -->
+  <div id="cardStage">
+    <div id="card">
+      <div class="badge-2010" id="holidayBadge">20 • 10  NGÀY PHỤ NỮ VIỆT NAM</div>
+      <div class="top-heart">❤️</div>
+      <div class="send-to">Gửi riêng cho</div>
+      <h1 class="recipient-name" id="recipientName">Linh My</h1>
+      <div class="ornament">✿ 💗 ✿</div>
+
+      <div class="typewriter-box">
+        <span id="typewriterText"></span><span class="cursor-caret" id="caret"></span>
+      </div>
+
+      <div class="wishes-grid">
+        <div class="wish-item">
+          <div class="wish-icon">🌷</div>
+          <div class="wish-title">Luôn xinh đẹp</div>
+          <div class="wish-desc">Rạng rỡ từ nụ cười đến trái tim.</div>
+        </div>
+        <div class="wish-item">
+          <div class="wish-icon">✨</div>
+          <div class="wish-title">Thật hạnh phúc</div>
+          <div class="wish-desc">Mỗi ngày đều có một niềm vui nhỏ.</div>
+        </div>
+        <div class="wish-item">
+          <div class="wish-icon">🍀</div>
+          <div class="wish-title">Bình yên</div>
+          <div class="wish-desc">Nhẹ nhàng giữa mọi bộn bề.</div>
+        </div>
+        <div class="wish-item">
+          <div class="wish-icon">💝</div>
+          <div class="wish-title">Được yêu thương</div>
+          <div class="wish-desc">Nhiều hơn bạn có thể cảm nhận.</div>
+        </div>
+      </div>
+
+      <div class="card-extra" id="cardExtra">
+        <p class="closing-quote" id="closingQuote"></p>
+        <div class="signature" id="signatureText"></div>
+        <div class="space-hint">(nhấn phím Space để thả thêm tim)</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Tuỳ chỉnh: có thể mở khi đang xem hiệu ứng hoặc thiệp -->
+  <button id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel" title="Mở phần tùy chỉnh">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1A1.65 1.65 0 0 0 11 18.4a1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1A1.65 1.65 0 0 0 7.6 10a1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    Tùy chỉnh
+  </button>
+  <div id="settingsOverlay" aria-hidden="true" class=""></div>
+  <aside id="settingsPanel" role="dialog" aria-modal="true" aria-label="Tùy chỉnh lời chúc" aria-hidden="true" class="">
+    <div class="panel-head">
+      <div><h2>✨ Cá nhân hóa thiệp</h2><p class="panel-subtitle">Thay đổi nội dung, màu sắc và hiệu ứng theo ý bạn.</p></div>
+      <button id="settingsClose" type="button" aria-label="Đóng tùy chỉnh">×</button>
+    </div>
+    <div class="panel-scroll">
+      <section class="panel-section">
+        <h3>✏️ Nội dung chính</h3>
+        <div class="panel-field"><label for="setting-recipient">Tên người nhận</label><input id="setting-recipient" data-setting="recipient" type="text" maxlength="45" autocomplete="off"></div>
+        <div class="panel-field"><label for="setting-line1">Dòng chữ hiệu ứng phía trên</label><input id="setting-line1" data-setting="line1" type="text" maxlength="42" autocomplete="off"></div>
+        <div class="panel-field"><label for="setting-line2">Dòng chữ hiệu ứng phía dưới</label><input id="setting-line2" data-setting="line2" type="text" maxlength="36" autocomplete="off"></div>
+        <div class="panel-field"><label for="setting-badge">Dòng nhãn ngày lễ</label><input id="setting-badge" data-setting="badge" type="text" maxlength="90"></div>
+        <div class="panel-field"><label for="setting-button">Chữ trên nút bắt đầu</label><input id="setting-button" data-setting="button" type="text" maxlength="50"></div>
+        <div class="panel-field"><label for="setting-message">Lời chúc chính (hiệu ứng đánh máy)</label><textarea id="setting-message" data-setting="message" maxlength="900"></textarea></div>
+        <div class="panel-field"><label for="setting-quote">Lời nhắn cuối</label><textarea id="setting-quote" data-setting="quote" maxlength="400"></textarea></div>
+        <div class="panel-field"><label for="setting-signature">Chữ ký</label><input id="setting-signature" data-setting="signature" type="text" maxlength="100"></div>
+      </section>
+      <section class="panel-section">
+        <h3>💝 4 ô lời chúc</h3>
+        <div id="wishEditors"></div>
+      </section>
+      <section class="panel-section">
+        <h3>🎨 Màu sắc &amp; chữ</h3>
+        <div class="panel-field"><label for="setting-theme">Bảng màu có sẵn</label><select id="setting-theme" data-setting="theme">
+          <option value="pink">🌸 Hồng ngọt ngào</option><option value="lavender">💜 Tím mộng mơ</option><option value="blue">💙 Xanh đêm</option><option value="sunset">🌅 Cam hoàng hôn</option>
+        </select></div>
+        <div class="panel-field"><label for="setting-accent">Màu nhấn tùy chọn</label><div class="panel-color-row"><input id="setting-accent" data-setting="accent" type="color"><span class="panel-subtitle">Nút, tiêu đề và viền nổi bật.</span></div></div>
+        <div class="panel-field"><label for="setting-fontScale">Kích thước chữ hiệu ứng</label><div class="range-row"><input id="setting-fontScale" data-setting="fontScale" type="range" min="70" max="140" step="5"><span id="fontScaleValue">100%</span></div></div>
+      </section>
+      <section class="panel-section">
+        <h3>✨ Hiệu ứng</h3>
+        <label class="panel-switch">Hiển thị các vì sao <input data-setting="stars" type="checkbox"></label>
+        <label class="panel-switch">Mưa trái tim <input data-setting="hearts" type="checkbox"></label>
+        <label class="panel-switch">Vệt tim khi di chuột <input data-setting="trail" type="checkbox"></label>
+        <div class="panel-field"><label for="setting-heartRate">Số lượng tim rơi</label><div class="range-row"><input id="setting-heartRate" data-setting="heartRate" type="range" min="20" max="100" step="10"><span id="heartRateValue">60%</span></div></div>
+      </section>
+    </div>
+    <div class="panel-foot">
+      <div class="panel-actions">
+        <button id="settingsRestart" class="panel-action primary" type="button">↻ Xem từ đầu</button>
+        <button id="settingsExport" class="panel-action primary" type="button">↓ Tải HTML</button>
+        <button id="settingsSave" class="panel-action" type="button">✓ Lưu thiết lập</button>
+        <button id="settingsReset" class="panel-action" type="button">⟲ Về mặc định</button>
+      </div>
+      <div id="saveStatus" role="status" aria-live="polite">Tự động lưu các thay đổi trên trình duyệt này.</div>
+    </div>
+  </aside>
+
+  <script id="greeting-config" type="application/json">{"recipient":"Linh My","line1":"CHÚC MỪNG 20/10","line2":"Linh My","badge":"20 • 10  NGÀY PHỤ NỮ VIỆT NAM","button":"Giải mã 💌","message":"Nhân ngày 20/10, chúc Linh My luôn xinh đẹp, rạng rỡ như đóa hồng đầu mùa. Mong mỗi ngày của bạn đều ngập tràn tiếng cười và thật nhiều yêu thương. 🌸","quote":"","signature":"","wishes":[{"icon":"🌷","title":"Luôn xinh đẹp","desc":"Rạng rỡ từ nụ cười đến trái tim."},{"icon":"✨","title":"Thật hạnh phúc","desc":"Mỗi ngày đều có một niềm vui nhỏ."},{"icon":"🍀","title":"Bình yên","desc":"Nhẹ nhàng giữa mọi bộn bề."},{"icon":"💝","title":"Được yêu thương","desc":"Nhiều hơn bạn có thể cảm nhận."}],"theme":"pink","accent":"#ff6fae","fontScale":100,"stars":true,"hearts":true,"trail":true,"heartRate":60}</script>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const rnd = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const randRange = (min, max) => min + Math.random() * (max - min);
+    const HEARTS = ["💖", "💕", "💗", "💓", "💝", "💘", "❤️", "🌸", "✨"];
+
+    // Embedded configuration travels with an exported .html file.
+    const DEFAULT_CONFIG = {
+      recipient: "Hồng Lạc", line1: "CHÚC MỪNG 20/10", line2: "HỒNG LẠC",
+      badge: "20 • 10  NGÀY PHỤ NỮ VIỆT NAM", button: "Giải mã 💌",
+      message: "Nhân ngày 20/10, chúc Hồng Lạc luôn xinh đẹp, rạng rỡ như đóa hồng đầu mùa. Mong mỗi ngày của bạn đều ngập tràn tiếng cười và thật nhiều yêu thương. 🌸",
+      quote: "Cảm ơn bạn vì đã xuất hiện và làm thế giới này dịu dàng hơn rất nhiều.",
+      signature: "— Một người luôn nghĩ đến bạn 🌹",
+      wishes: [
+        { icon: "🌷", title: "Luôn xinh đẹp", desc: "Rạng rỡ từ nụ cười đến trái tim." },
+        { icon: "✨", title: "Thật hạnh phúc", desc: "Mỗi ngày đều có một niềm vui nhỏ." },
+        { icon: "🍀", title: "Bình yên", desc: "Nhẹ nhàng giữa mọi bộn bề." },
+        { icon: "💝", title: "Được yêu thương", desc: "Nhiều hơn bạn có thể cảm nhận." }
+      ],
+      theme: "pink", accent: "#ff6fae", fontScale: 100,
+      stars: true, hearts: true, trail: true, heartRate: 60
+    };
+    const THEMES = {
+      pink: { accent: "#ff6fae", deep: "#ff3d84", bg: ["#59122e", "#31081a", "#14020a"] },
+      lavender: { accent: "#c49cff", deep: "#8b59eb", bg: ["#352257", "#1c1236", "#10081d"] },
+      blue: { accent: "#77cfff", deep: "#3489e6", bg: ["#154367", "#0c203c", "#06121f"] },
+      sunset: { accent: "#ffbe83", deep: "#f57e78", bg: ["#6a3439", "#3b1b30", "#190b18"] }
+    };
+    const embeddedText = $("greeting-config").textContent.trim() || "{}";
+    let embedded = {};
+    try { embedded = JSON.parse(embeddedText); } catch (_) { /* keep defaults */ }
+    function configKey(text) {
+      let h = 2166136261;
+      for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+      return "greeting-2010-settings-v3-" + (h >>> 0).toString(36);
+    }
+    const STORAGE_KEY = configKey(embeddedText);
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch (_) { /* file / privacy mode */ }
+    function normalizeConfig(value) {
+      const c = { ...DEFAULT_CONFIG, ...value };
+      c.wishes = DEFAULT_CONFIG.wishes.map((wish, i) => ({ ...wish, ...(value.wishes?.[i] || {}) }));
+      c.theme = THEMES[c.theme] ? c.theme : "pink";
+      if (!/^#[0-9a-fA-F]{6}$/.test(c.accent)) c.accent = THEMES[c.theme].accent;
+      c.fontScale = Math.min(140, Math.max(70, Number(c.fontScale) || 100));
+      c.heartRate = Math.min(100, Math.max(20, Number(c.heartRate) || 60));
+      for (const key of ["stars", "hearts", "trail"]) c[key] = !!c[key];
+      for (const key of ["recipient", "line1", "line2", "badge", "button", "message", "quote", "signature"]) {
+        c[key] = String(c[key] ?? DEFAULT_CONFIG[key]).normalize("NFC");
+      }
+      return c;
+    }
+    let config = normalizeConfig({ ...embedded, ...saved });
+    function shadeHex(hex, amt) {
+      const parts = [1,3,5].map(i => parseInt(hex.slice(i,i+2), 16));
+      return "#" + parts.map(n => Math.round(Math.min(255, Math.max(0, n * amt))).toString(16).padStart(2,"0")).join("");
+    }
+    function applyColors() {
+      const palette = THEMES[config.theme];
+      const root = document.documentElement.style;
+      root.setProperty("--accent", config.accent);
+      root.setProperty("--accent-strong", shadeHex(config.accent, .82));
+      root.setProperty("--bg-inner", palette.bg[0]);
+      root.setProperty("--bg-mid", palette.bg[1]);
+      root.setProperty("--bg-outer", palette.bg[2]);
+    }
+    applyColors();
+
+
+    // Custom glowing cursor & heart trail (matches code shown in video at 00:02-00:03)
+    const cur = document.createElement("div");
+    cur.className = "cursor-glow";
+    document.body.appendChild(cur);
+
+    let lt = 0;
+    addEventListener("pointermove", (e) => {
+      if (!config.trail || $("settingsPanel").classList.contains("open")) { cur.style.opacity = 0; return; }
+      cur.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+      cur.style.opacity = 1;
+      const n = performance.now();
+      if (n - lt < 50) return;
+      lt = n;
+      const t = document.createElement("div");
+      t.className = "trail";
+      t.textContent = rnd(["💖", "💕", "💗", "✨"]);
+      t.style.cssText = `left:${e.clientX}px;top:${e.clientY}px`;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 1100);
+    });
+
+    document.addEventListener("mouseleave", () => (cur.style.opacity = 0));
+
+    // Particle burst helper
+    function burst(x, y, char = "💖", count = 14) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement("div");
+        p.className = "burst-particle";
+        p.textContent = typeof char === "string" ? char : rnd(HEARTS);
+        p.style.left = `${x}px`;
+        p.style.top = `${y}px`;
+        document.body.appendChild(p);
+
+        const angle = (Math.PI * 2 * i) / count + randRange(-0.25, 0.25);
+        const velocity = randRange(45, 140);
+        const dx = Math.cos(angle) * velocity;
+        const dy = Math.sin(angle) * velocity - randRange(15, 45);
+        const rot = randRange(-180, 180);
+        const dur = randRange(700, 1150);
+
+        p.animate(
+          [
+            { transform: `translate(-50%, -50%) scale(0.5) rotate(0deg)`, opacity: 1 },
+            { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.2) rotate(${rot}deg)`, opacity: 0 }
+          ],
+          { duration: dur, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+        ).onfinish = () => p.remove();
+      }
+    }
+
+    $("card").addEventListener("click", (e) => {
+      if (!config.hearts) return;
+      if (e.target.tagName !== "BUTTON") {
+        for (let i = 0; i < 6; i++) {
+          burst(e.clientX, e.clientY, rnd(HEARTS), 4);
+        }
+        spawnHearts(14, e.clientX);
+      }
+    });
+
+    const bgCanvas = $("bgCanvas");
+    const bgCtx = bgCanvas.getContext("2d");
+    let W = (bgCanvas.width = window.innerWidth);
+    let H = (bgCanvas.height = window.innerHeight);
+
+    const stars = Array.from({ length: 85 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: randRange(0.6, 2.2),
+      alpha: randRange(0.2, 0.85),
+      speed: randRange(0.008, 0.028),
+      phase: Math.random() * Math.PI * 2,
+      driftY: randRange(-0.15, -0.04)
+    }));
+
+    function drawBg() {
+      bgCtx.clearRect(0, 0, W, H);
+      if (!config.stars) { requestAnimationFrame(drawBg); return; }
+      for (const s of stars) {
+        s.phase += s.speed;
+        s.y += s.driftY;
+        if (s.y < -10) {
+          s.y = H + 10;
+          s.x = Math.random() * W;
+        }
+        const a = s.alpha * (0.55 + 0.45 * Math.sin(s.phase));
+        bgCtx.save();
+        bgCtx.beginPath();
+        bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(255, 210, 230, ${a})`;
+        bgCtx.shadowBlur = 10;
+        bgCtx.shadowColor = "rgba(255, 120, 180, 0.8)";
+        bgCtx.fill();
+        bgCtx.restore();
+      }
+      requestAnimationFrame(drawBg);
+    }
+    drawBg();
+
+    const lettersLayer = $("lettersLayer");
+    let LINE_1 = config.line1;
+    let LINE_2 = config.line2;
+    const EXTRA_DECO = ["S", "6", "8", "E", "B", "K", "Y", "R", "O", "M", "A", "L"];
+
+    const letterItems = [];
+    let letterState = "floating"; // "floating" | "assembling" | "assembled" | "hidden"
+    let assembleStart = 0;
+    const ASSEMBLE_DURATION = 2600;
+
+    function computeTargets() {
+      const measureCtx = document.createElement("canvas").getContext("2d");
+      const fitLine = (text, preferredSize, trackingRatio) => {
+        let fontSize = preferredSize * (config.fontScale / 100);
+        const widths = [];
+        const calc = (sz) => {
+          measureCtx.font = `800 ${sz}px "Playfair Display", Georgia, serif`;
+          const spacing = sz * trackingRatio;
+          return Array.from(text).reduce((sum, ch) => sum + measureCtx.measureText(ch).width + spacing, -spacing);
+        };
+        const extent = calc(fontSize);
+        if (extent > W * .91) fontSize *= W * .91 / extent;
+        measureCtx.font = `800 ${fontSize}px "Playfair Display", Georgia, serif`;
+        for (const ch of text) widths.push(measureCtx.measureText(ch).width);
+        const tracking = fontSize * trackingRatio;
+        const total = Math.max(0, widths.reduce((sum, width) => sum + width + tracking, -tracking));
+        return { fontSize, widths, tracking, total };
+      };
+      const a = fitLine(LINE_1, Math.min(Math.max(W * .036, 22), 44), .08);
+      const b = fitLine(LINE_2, Math.min(Math.max(W * .064, 38), 76), .09);
+      const centerY = H * .43;
+      const y1 = centerY - b.fontSize * .62;
+      const y2 = centerY + b.fontSize * .25;
+      let curX = (W - a.total) / 2;
+      let idx = 0;
+      const chars1 = Array.from(LINE_1);
+      const chars2 = Array.from(LINE_2);
+      for (let i = 0; i < chars1.length; i++) {
+        const ch = chars1[i], width = a.widths[i];
+        if (ch !== " ") {
+          const item = letterItems[idx++];
+          if (item) { item.tx = curX + width/2; item.ty = y1; item.el.style.fontSize = `${a.fontSize}px`; }
+        }
+        curX += width + a.tracking;
+      }
+      curX = (W - b.total) / 2;
+      for (let i = 0; i < chars2.length; i++) {
+        const ch = chars2[i], width = b.widths[i];
+        if (ch !== " ") {
+          const item = letterItems[idx++];
+          if (item) { item.tx = curX + width/2; item.ty = y2; item.el.style.fontSize = `${b.fontSize}px`; }
+        }
+        curX += width + b.tracking;
+      }
+    }
+
+    function initLetters() {
+      lettersLayer.innerHTML = "";
+      letterItems.length = 0;
+
+      // Create characters for Line 1
+      for (const ch of LINE_1) {
+        if (ch === " ") continue;
+        createLetterNode(ch, "line1", Math.random() < 0.18);
+      }
+
+      // Create characters for Line 2
+      for (const ch of LINE_2) {
+        if (ch === " ") continue;
+        createLetterNode(ch, "line2", Math.random() < 0.25);
+      }
+
+      // Extra ambient decoy characters like in the video
+      for (const ch of EXTRA_DECO) {
+        createLetterNode(ch, "deco", Math.random() < 0.22, true);
+      }
+
+      computeTargets();
+    }
+
+    function createLetterNode(ch, group, ringed = false, isDeco = false) {
+      const el = document.createElement("div");
+      el.className = `letter-node ${group}${ringed ? " ringed" : ""}`;
+      el.textContent = ch;
+      if (isDeco) {
+        el.style.fontSize = `${randRange(20, 44)}px`;
+      }
+      lettersLayer.appendChild(el);
+
+      // Keep initial random positions away from the exact center button
+      let x, y;
+      do {
+        x = randRange(W * 0.06, W * 0.94);
+        y = randRange(H * 0.07, H * 0.92);
+      } while (Math.hypot(x - W * 0.5, y - H * 0.5) < 115);
+
+      letterItems.push({
+        el,
+        ch,
+        isDeco,
+        x,
+        y,
+        sx: x,
+        sy: y,
+        tx: W * 0.5,
+        ty: H * 0.5,
+        vx: randRange(-0.45, 0.45),
+        vy: randRange(-0.4, 0.4),
+        rot: randRange(-40, 40),
+        sRot: 0,
+        vRot: randRange(-0.35, 0.35),
+        scale: randRange(0.75, 1.25),
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function animateLetters(now) {
+      if (letterState === "floating") {
+        for (const item of letterItems) {
+          item.x += item.vx;
+          item.y += item.vy;
+          item.rot += item.vRot;
+          item.phase += 0.02;
+
+          if (item.x < 40 || item.x > W - 40) item.vx *= -1;
+          if (item.y < 40 || item.y > H - 40) item.vy *= -1;
+
+          const bob = Math.sin(item.phase) * 4;
+          item.el.style.transform = `translate3d(${item.x}px, ${item.y + bob}px, 0) translate(-50%, -50%) rotate(${item.rot}deg) scale(${item.scale})`;
+        }
+      } else if (letterState === "assembling") {
+        const elapsed = now - assembleStart;
+        const rawProgress = Math.min(elapsed / ASSEMBLE_DURATION, 1);
+        const p = easeInOutCubic(rawProgress);
+
+        for (const item of letterItems) {
+          if (item.isDeco) {
+            // Decoy letters drift outward and fade away
+            const curX = item.sx + (item.sx - W / 2) * p * 0.6;
+            const curY = item.sy + (item.sy - H / 2) * p * 0.6;
+            item.el.style.opacity = String(1 - p);
+            item.el.style.transform = `translate3d(${curX}px, ${curY}px, 0) translate(-50%, -50%) rotate(${item.sRot + p * 90}deg) scale(${item.scale * (1 - p * 0.5)})`;
+          } else {
+            // Swirl slightly as they converge
+            const swirl = Math.sin(p * Math.PI) * 28;
+            const curX = item.sx + (item.tx - item.sx) * p + swirl * Math.cos(item.phase);
+            const curY = item.sy + (item.ty - item.sy) * p + swirl * Math.sin(item.phase);
+            const curRot = item.sRot * (1 - p);
+            const curScale = item.scale + (1 - item.scale) * p;
+            item.el.style.transform = `translate3d(${curX}px, ${curY}px, 0) translate(-50%, -50%) rotate(${curRot}deg) scale(${curScale})`;
+          }
+        }
+
+        if (rawProgress >= 1) {
+          letterState = "assembled";
+          onLettersAssembled();
+        }
+      } else if (letterState === "assembled") {
+        for (const item of letterItems) {
+          if (!item.isDeco) {
+            item.phase += 0.035;
+            const gentleY = Math.sin(item.phase) * 2.5;
+            item.el.style.transform = `translate3d(${item.tx}px, ${item.ty + gentleY}px, 0) translate(-50%, -50%) rotate(0deg) scale(1)`;
+          }
+        }
+      }
+
+      if (letterState !== "hidden") {
+        requestAnimationFrame(animateLetters);
+      }
+    }
+
+    initLetters();
+    requestAnimationFrame(animateLetters);
+
+    const heartCanvas = $("heartCanvas");
+    const hCtx = heartCanvas.getContext("2d");
+    heartCanvas.width = W;
+    heartCanvas.height = H;
+
+    const physicsHearts = [];
+    const MAX_HEARTS = 220;
+    let heartRainActive = false;
+
+    const HEART_PALETTE = [
+      { c1: "#ff9ec7", c2: "#ff3d84", c3: "#9e0b45", glow: "rgba(255, 61, 132, 0.65)" },
+      { c1: "#ffb8d1", c2: "#ff5c8a", c3: "#a8133d", glow: "rgba(255, 92, 138, 0.65)" },
+      { c1: "#ffd1b3", c2: "#ff6b6b", c3: "#a31621", glow: "rgba(255, 107, 107, 0.6)" },
+      { c1: "#ffcae5", c2: "#e83e8c", c3: "#7c0d43", glow: "rgba(232, 62, 140, 0.65)" }
+    ];
+
+    function createPhysicsHeart(customX, customY, burstUp = false) {
+      if (!config.hearts) return;
+      if (physicsHearts.length >= MAX_HEARTS) {
+        // Remove oldest settled heart if over cap
+        physicsHearts.shift();
+      }
+      const r = randRange(12, 22);
+      const x = customX !== undefined ? customX + randRange(-60, 60) : randRange(r + 10, W - r - 10);
+      const y = customY !== undefined ? customY : randRange(-120, -20);
+      const palette = rnd(HEART_PALETTE);
+
+      physicsHearts.push({
+        x: Math.max(r, Math.min(W - r, x)),
+        y,
+        vx: randRange(-1.8, 1.8),
+        vy: burstUp ? randRange(-8, -3) : randRange(0.8, 3.2),
+        r,
+        rot: randRange(-0.55, 0.55),
+        vRot: randRange(-0.02, 0.02),
+        palette,
+        alpha: randRange(0.82, 0.98),
+        settled: false
+      });
+    }
+
+    function spawnHearts(count = 18, customX) {
+      if (!config.hearts) return;
+      count = Math.max(1, Math.round(count * config.heartRate / 60));
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          createPhysicsHeart(customX, randRange(-80, -15), false);
+        }, i * 45);
+      }
+    }
+
+    function drawGlossyHeart(ctx, x, y, size, rot, palette, alpha) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.globalAlpha = alpha;
+
+      const s = size / 16;
+      ctx.scale(s, s);
+
+      ctx.beginPath();
+      ctx.moveTo(0, 5);
+      ctx.bezierCurveTo(0, 2, -5, -10, -14, -10);
+      ctx.bezierCurveTo(-24, -10, -24, 5, -24, 5);
+      ctx.bezierCurveTo(-24, 15, -12, 23, 0, 31);
+      ctx.bezierCurveTo(12, 23, 24, 15, 24, 5);
+      ctx.bezierCurveTo(24, 5, 24, -10, 14, -10);
+      ctx.bezierCurveTo(5, -10, 0, 2, 0, 5);
+      ctx.closePath();
+
+      const grad = ctx.createRadialGradient(-6, -2, 2, 0, 8, 28);
+      grad.addColorStop(0, palette.c1);
+      grad.addColorStop(0.55, palette.c2);
+      grad.addColorStop(1, palette.c3);
+
+      ctx.shadowColor = palette.glow;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Glossy highlight dot
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.ellipse(-9, -2, 4.5, 2.4, -0.5, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function updateAndDrawHearts() {
+      hCtx.clearRect(0, 0, W, H);
+
+      if (!config.hearts) { physicsHearts.length = 0; requestAnimationFrame(updateAndDrawHearts); return; }
+      const gravity = 0.16;
+      const bounce = 0.42;
+      const floorY = H - 14;
+
+      for (let i = 0; i < physicsHearts.length; i++) {
+        const h1 = physicsHearts[i];
+
+        h1.vy += gravity;
+        h1.x += h1.vx;
+        h1.y += h1.vy;
+        h1.rot += h1.vRot;
+
+        // Keep rotational tilt natural
+        h1.rot *= 0.99;
+        h1.vx *= 0.985;
+
+        // Wall collisions
+        if (h1.x < h1.r) {
+          h1.x = h1.r;
+          h1.vx *= -0.6;
+        } else if (h1.x > W - h1.r) {
+          h1.x = W - h1.r;
+          h1.vx *= -0.6;
+        }
+
+        // Floor collision
+        if (h1.y + h1.r > floorY) {
+          h1.y = floorY - h1.r;
+          h1.vy *= -bounce;
+          h1.vx *= 0.85;
+          h1.vRot *= 0.7;
+          if (Math.abs(h1.vy) < 0.35) h1.vy = 0;
+        }
+
+        // Heart-to-heart soft collision so they pile up nicely at the bottom
+        for (let j = i + 1; j < physicsHearts.length; j++) {
+          const h2 = physicsHearts[j];
+          const dx = h2.x - h1.x;
+          const dy = h2.y - h1.y;
+          const minDist = (h1.r + h2.r) * 0.86;
+          const distSq = dx * dx + dy * dy;
+
+          if (distSq < minDist * minDist && distSq > 0.001) {
+            const dist = Math.sqrt(distSq);
+            const overlap = (minDist - dist) * 0.5;
+            const nx = dx / dist;
+            const ny = dy / dist;
+
+            h1.x -= nx * overlap;
+            h1.y -= ny * overlap;
+            h2.x += nx * overlap;
+            h2.y += ny * overlap;
+
+            const rvx = h2.vx - h1.vx;
+            const rvy = h2.vy - h1.vy;
+            const velAlongNormal = rvx * nx + rvy * ny;
+
+            if (velAlongNormal < 0) {
+              const impulse = -(1 + 0.25) * velAlongNormal * 0.5;
+              h1.vx -= impulse * nx;
+              h1.vy -= impulse * ny;
+              h2.vx += impulse * nx;
+              h2.vy += impulse * ny;
+            }
+          }
+        }
+
+        drawGlossyHeart(hCtx, h1.x, h1.y, h1.r, h1.rot, h1.palette, h1.alpha);
+      }
+
+      requestAnimationFrame(updateAndDrawHearts);
+    }
+    requestAnimationFrame(updateAndDrawHearts);
+
+    const btn = $("btn");
+    const statusText = $("statusText");
+    const statusWrap = $("statusWrap");
+
+    btn.addEventListener("click", (e) => {
+      const rect = btn.getBoundingClientRect();
+      burst(rect.left + rect.width / 2, rect.top + rect.height / 2, "💖", 18);
+
+      // Hide button and move status text below assembling title
+      btn.style.opacity = "0";
+      btn.style.pointerEvents = "none";
+      setTimeout(() => (btn.style.display = "none"), 300);
+
+      statusWrap.classList.add("lowered");
+      statusText.textContent = "Các chữ cái đang tìm về nhau... ✨";
+
+      // Lock start positions and trigger assembly
+      computeTargets();
+      for (const item of letterItems) {
+        item.sx = item.x;
+        item.sy = item.y;
+        item.sRot = item.rot;
+        item.el.classList.add("assembled");
+      }
+      assembleStart = performance.now();
+      letterState = "assembling";
+    });
+
+    function onLettersAssembled() {
+      statusText.textContent = "Giải mã thành công 💖";
+      burst(W * 0.5, H * 0.42, "💖", 26);
+
+      // Start raining glossy hearts that pile up at the bottom
+      heartRainActive = config.hearts;
+      spawnHearts(45);
+
+      // Continuous gentle trickle of hearts
+      setInterval(() => {
+        if (heartRainActive && config.hearts && Math.random() < config.heartRate / 100 && physicsHearts.length < 135) {
+          createPhysicsHeart();
+        }
+      }, 450);
+
+      // After holding the assembled title for a moment, reveal the greeting card
+      setTimeout(() => {
+        lettersLayer.style.opacity = "0";
+        lettersLayer.style.transform = "scale(1.06)";
+        statusWrap.style.opacity = "0";
+
+        setTimeout(() => {
+          letterState = "hidden";
+          $("introStage").style.display = "none";
+          showGreetingCard();
+        }, 650);
+      }, 1500);
+    }
+
+    let typewriterTimer = null;
+
+    function showGreetingCard() {
+      const cardStage = $("cardStage");
+      cardStage.classList.add("show");
+      spawnHearts(28);
+
+      // Start typewriter effect after card fades in
+      setTimeout(() => {
+        const target = $("typewriterText");
+        const caret = $("caret");
+        if (typewriterTimer) clearInterval(typewriterTimer);
+        target.textContent = "";
+        caret.style.display = "";
+        const chars = Array.from(config.message);
+        let i = 0;
+
+        typewriterTimer = setInterval(() => {
+          if (i < chars.length) {
+            target.textContent += chars[i];
+            i++;
+          } else {
+            clearInterval(typewriterTimer);
+            typewriterTimer = null;
+            caret.style.display = "none";
+            revealCardDetails();
+          }
+        }, 38);
+      }, 550);
+    }
+
+    function revealCardDetails() {
+      const items = document.querySelectorAll(".wish-item");
+      items.forEach((item, idx) => {
+        setTimeout(() => {
+          item.classList.add("visible");
+        }, idx * 180);
+      });
+
+      setTimeout(() => {
+        $("cardExtra").classList.add("visible");
+      }, items.length * 180 + 200);
+    }
+
+    // Press Spacebar to drop more hearts (as written at the bottom of the card)
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Escape" && $("settingsPanel").classList.contains("open")) {
+        closeSettings();
+        return;
+      }
+      if (e.code === "Space" && !["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(document.activeElement?.tagName) && !$("settingsPanel").classList.contains("open")) {
+        e.preventDefault();
+        spawnHearts(18);
+        burst(
+          randRange(W * 0.25, W * 0.75),
+          randRange(H * 0.2, H * 0.5),
+          rnd(HEARTS),
+          12
+        );
+      }
+    });
+
+
+    // ---------- Trình biên tập nội dung ----------
+    function applyContent() {
+      $("recipientName").textContent = config.recipient;
+      $("holidayBadge").textContent = config.badge;
+      $("closingQuote").textContent = config.quote;
+      $("signatureText").textContent = config.signature;
+      $("btn").textContent = config.button;
+      document.title = `Gửi ${config.recipient || "bạn"} 💌`;
+      document.querySelectorAll(".wish-item").forEach((el, i) => {
+        const wish = config.wishes[i];
+        el.querySelector(".wish-icon").textContent = wish.icon;
+        el.querySelector(".wish-title").textContent = wish.title;
+        el.querySelector(".wish-desc").textContent = wish.desc;
+      });
+      if ($("cardStage").classList.contains("show")) {
+        if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+        $("typewriterText").textContent = config.message;
+        $("caret").style.display = "none";
+        document.querySelectorAll(".wish-item").forEach(el => el.classList.add("visible"));
+        $("cardExtra").classList.add("visible");
+      }
+      const changedLetters = LINE_1 !== config.line1 || LINE_2 !== config.line2;
+      LINE_1 = config.line1;
+      LINE_2 = config.line2;
+      if (changedLetters && letterState === "floating") initLetters();
+      else if (letterState !== "hidden") computeTargets();
+      heartRainActive = config.hearts && letterState !== "floating";
+      if (!config.hearts) physicsHearts.length = 0;
+      if (!config.trail) cur.style.opacity = 0;
+      applyColors();
+    }
+    function persistSettings() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); return true; }
+      catch (_) { return false; }
+    }
+    function updateStatus(message) { $("saveStatus").textContent = message; }
+    const editor = $("wishEditors");
+    DEFAULT_CONFIG.wishes.forEach((wish, i) => {
+      const group = document.createElement("div");
+      group.className = "wish-editor";
+      const title = document.createElement("div"); title.className = "wish-editor-title"; title.textContent = `Ô ${i + 1}`;
+      group.appendChild(title);
+      const fields = [ ["icon", "Biểu tượng", 8], ["title", "Tiêu đề", 70], ["desc", "Mô tả", 180] ];
+      fields.forEach(([key, label, limit]) => {
+        const wrap = document.createElement("div"); wrap.className = "panel-field";
+        const caption = document.createElement("label"); caption.textContent = label;
+        const input = document.createElement("input"); input.type = "text"; input.maxLength = limit;
+        input.dataset.wishIndex = i; input.dataset.wishProp = key;
+        input.id = `wish-${i}-${key}`; caption.htmlFor = input.id;
+        wrap.append(caption, input); group.appendChild(wrap);
+      });
+      editor.appendChild(group);
+    });
+    function syncSettingsForm() {
+      document.querySelectorAll("[data-setting]").forEach(input => {
+        input.type === "checkbox" ? input.checked = !!config[input.dataset.setting] : input.value = config[input.dataset.setting];
+      });
+      document.querySelectorAll("[data-wish-index]").forEach(input => {
+        input.value = config.wishes[+input.dataset.wishIndex][input.dataset.wishProp];
+      });
+      $("fontScaleValue").textContent = config.fontScale + "%";
+      $("heartRateValue").textContent = config.heartRate + "%";
+    }
+    function openSettings() {
+      $("settingsOverlay").classList.add("open");
+      $("settingsPanel").classList.add("open");
+      $("settingsPanel").setAttribute("aria-hidden", "false");
+      $("settingsToggle").setAttribute("aria-expanded", "true");
+      $("settingsClose").focus();
+    }
+    function closeSettings() {
+      $("settingsOverlay").classList.remove("open");
+      $("settingsPanel").classList.remove("open");
+      $("settingsPanel").setAttribute("aria-hidden", "true");
+      $("settingsToggle").setAttribute("aria-expanded", "false");
+      $("settingsToggle").focus();
+    }
+    $("settingsToggle").addEventListener("click", () =>
+      $("settingsPanel").classList.contains("open") ? closeSettings() : openSettings());
+    $("settingsClose").addEventListener("click", closeSettings);
+    $("settingsOverlay").addEventListener("click", closeSettings);
+    document.querySelectorAll("[data-setting]").forEach(input => {
+      const handler = () => {
+        const key = input.dataset.setting;
+        config[key] = input.type === "checkbox" ? input.checked :
+          input.type === "range" ? +input.value : input.value;
+        if (key === "theme") config.accent = THEMES[config.theme].accent;
+        config = normalizeConfig(config);
+        syncSettingsForm(); applyContent();
+        updateStatus(persistSettings() ? "✓ Đã tự động lưu thay đổi." : "Đang xem thử: trình duyệt không cho phép lưu cục bộ.");
+      };
+      input.addEventListener(input.type === "checkbox" || input.tagName === "SELECT" ? "change" : "input", handler);
+    });
+    document.querySelectorAll("[data-wish-index]").forEach(input => {
+      input.addEventListener("input", () => {
+        config.wishes[+input.dataset.wishIndex][input.dataset.wishProp] = input.value;
+        applyContent();
+        updateStatus(persistSettings() ? "✓ Đã tự động lưu thay đổi." : "Đang xem thử: không thể lưu cục bộ.");
+      });
+    });
+    $("settingsSave").addEventListener("click", () => updateStatus(
+      persistSettings() ? "✓ Đã lưu vào trình duyệt này." : "Trình duyệt chặn lưu. Bạn vẫn có thể tải HTML."));
+    $("settingsRestart").addEventListener("click", () => {
+      persistSettings(); window.location.reload();
+    });
+    $("settingsReset").addEventListener("click", () => {
+      config = normalizeConfig(DEFAULT_CONFIG);
+      syncSettingsForm(); applyContent(); persistSettings();
+      updateStatus("Đã khôi phục nội dung mặc định. Bấm ‘Xem từ đầu’ để phát lại.");
+    });
+    function exportGreeting() {
+      // Serialize a clean, replayable version; embed settings so the recipient
+      // sees them even on another computer, without relying on localStorage.
+      const clone = document.documentElement.cloneNode(true);
+      clone.querySelector("#greeting-config").textContent = JSON.stringify(config).replace(/</g, "\\u003c");
+      clone.querySelector("#settingsOverlay").classList.remove("open");
+      clone.querySelector("#settingsPanel").classList.remove("open");
+      clone.querySelector("#settingsPanel").setAttribute("aria-hidden", "true");
+      clone.querySelector("#settingsToggle").setAttribute("aria-expanded", "false");
+      // Editor rows are built at runtime; avoid duplicating them in exported files.
+      clone.querySelector("#wishEditors").replaceChildren();
+      clone.querySelector("#lettersLayer").replaceChildren();
+      clone.querySelector("#lettersLayer").removeAttribute("style");
+      clone.querySelector("#introStage").removeAttribute("style");
+      clone.querySelector("#statusWrap").classList.remove("lowered");
+      clone.querySelector("#statusWrap").removeAttribute("style");
+      clone.querySelector("#statusText").textContent = "✨ Có một thông điệp đang bay lạc... ✨";
+      clone.querySelector("#btn").removeAttribute("style");
+      clone.querySelector("#cardStage").classList.remove("show");
+      clone.querySelector("#typewriterText").textContent = "";
+      clone.querySelector("#caret").removeAttribute("style");
+      clone.querySelectorAll(".wish-item, #cardExtra").forEach(el => el.classList.remove("visible"));
+      clone.querySelectorAll(".trail, .burst-particle, .cursor-glow").forEach(el => el.remove());
+      clone.querySelector("#saveStatus").textContent = "Tự động lưu các thay đổi trên trình duyệt này.";
+      clone.querySelector("#bgCanvas").removeAttribute("width");
+      clone.querySelector("#bgCanvas").removeAttribute("height");
+      clone.querySelector("#heartCanvas").removeAttribute("width");
+      clone.querySelector("#heartCanvas").removeAttribute("height");
+      const html = "<!DOCTYPE html>\n" + clone.outerHTML;
+      const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "loi-chuc-20-10-" + (config.recipient.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g,"d").replace(/Đ/g,"D").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g, "") || "cua-ban") + ".html";
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      updateStatus("✓ Đã xuất file HTML kèm nội dung tùy chỉnh.");
+    }
+    $("settingsExport").addEventListener("click", exportGreeting);
+    syncSettingsForm(); applyContent();
+
+    // Responsive resize handling
+    window.addEventListener("resize", () => {
+      W = bgCanvas.width = heartCanvas.width = window.innerWidth;
+      H = bgCanvas.height = heartCanvas.height = window.innerHeight;
+      if (letterState !== "hidden") {
+        computeTargets();
+      }
+    });
+  </script>
+
+</body></html>
